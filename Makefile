@@ -26,6 +26,6 @@ path :
 	@grep "export PATH=" ~/.bashrc > /tmp/tmp && grep -qs $$(cat /tmp/.dir) /tmp/tmp || (echo  >> ~/.bashrc && echo "export PATH=\$$PATH:$$(echo $$(cat /tmp/.dir))" >> ~/.bashrc)
 
 update :
-	@git pull > /dev/null 2> /dev/null && make 2>/dev/null && echo "update done" || echo "already up to date"
+	@git pull 2> /dev/null | grep -qxF "Already up to date." && echo "Already up to date" || (make 2>/dev/null && echo "update done")
 
 .PHONY : all update path
