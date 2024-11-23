@@ -168,7 +168,10 @@ void    create_files(char *argv[])
 int     update_binary()
 {
     std::cout << "Updating binary..." << std::endl;
-    return (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)\""));
+    if (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)\"") == -1)
+        if (system("sh -c \"$(wget https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh -0 -)\"") == -1)
+            std::cout << "Please install one of the following packages : \n\t- curl\n\t- wget" << std::endl;
+    exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[])
