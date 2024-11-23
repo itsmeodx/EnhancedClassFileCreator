@@ -3,13 +3,13 @@
 
 to install run the following command :
 
-```cd && git clone https://github.com/mohammad-baazza/ClassFileCreator.git && cd ClassFileCreator && make```
+```sh -c "$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)"```
 
 then it should work properly on ```zsh``` and ```bash```.
 
 you can use it with the command ```hpp``` (use ```hpp -h``` for help)
 
->to update you need just to run ```cd ~/ClassFileCreator && make update```
+>to update you need just to run ```hpp -u```
 
 ### examples
 
