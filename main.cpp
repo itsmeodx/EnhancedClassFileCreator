@@ -168,7 +168,7 @@ void    create_files(char *argv[])
 int     update_binary()
 {
     std::cout << "Updating binary..." << std::endl;
-    return (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/refs/heads/tmp/install.sh)\""));
+    return (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/refs/heads/master/install.sh)\""));
 }
 
 int main(int argc, char *argv[])
