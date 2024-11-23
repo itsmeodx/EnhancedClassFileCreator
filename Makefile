@@ -6,7 +6,7 @@ SRCS = main.cpp
 
 INCLUDES = main.hpp
 
-FLAGS = -Wall -Wextra -Werror -O2
+FLAGS = -Wall -Wextra -Werror
 
 all : $(NAME)
 
@@ -26,6 +26,6 @@ path :
 	@grep "export PATH=" ~/.bashrc > /tmp/tmp && grep -qs $$(cat /tmp/.dir) /tmp/tmp || (echo  >> ~/.bashrc && echo "export PATH=\$$PATH:$$(echo $$(cat /tmp/.dir))" >> ~/.bashrc)
 
 update :
-	@git pull 2> /dev/null | grep -qxF "Already up to date." && echo "Already up to date" || (make 2>/dev/null && echo "update done")
+	@git pull 2> /dev/null | grep -qxF "Already up to date." && echo "Already up to date" || (make && echo "update done")
 
-.PHONY : all update path
+.PHONY : all update path dir
