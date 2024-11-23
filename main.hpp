@@ -6,5 +6,6 @@
 # define HELP 4
 # define SIMPLE 8
 # define DELETE 16
+# define UPDATE 32
 
 #endif

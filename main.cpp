@@ -100,6 +100,7 @@ void    show_help(char *program_name)
     std::cout << "\t\ts : create with simple filenames (without *.class*)" << std::endl;
     std::cout << "\t\th : show help" << std::endl;
     std::cout << "\t\td : delete class related files" << std::endl;
+    std::cout << "\t\tu : update the binary" << std::endl;
     std::exit(0);
 }
 
@@ -144,6 +145,8 @@ int get_options(char *argv1)
         result |= SIMPLE;
     if (options.find_first_of('d') != std::string::npos)
         result |= DELETE;
+    if (options.find_first_of('u') != std::string::npos)
+        result |= UPDATE;
     return (result);
 }
 
@@ -162,6 +165,12 @@ void    create_files(char *argv[])
 
 }
 
+int     update_binary()
+{
+    std::cout << "Updating binary..." << std::endl;
+    return (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/refs/heads/tmp/install.sh)\""));
+}
+
 int main(int argc, char *argv[])
 {
     int result;
@@ -169,6 +178,8 @@ int main(int argc, char *argv[])
     if (argc > 1)
     {
         result = get_options(argv[1]);
+        if (result & UPDATE)
+            return (update_binary());
         if (result & HELP)
             show_help(argv[0]);
         if (result & SIMPLE)
