@@ -1,16 +1,12 @@
 #!/bin/bash
 
-# Clone the repository
-clone() {
-	git clone https://github.com/itsmeodx/ClassFileCreator.git 2> /dev/null > /dev/null
-}
-
 # Change to the temporary directory
 cd /tmp
 
-# Check if the repository is already cloned or not
+# Clone the repository or update it
 echo "Cloning the repository..."
-clone  || (rm -rf ClassFileCreator && clone)
+[ -d ClassFileCreator ] && rm -rf ClassFileCreator
+git clone -q https://github.com/itsmeodx/ClassFileCreator.git
 
 # Change to the repository directory
 cd ClassFileCreator
