@@ -3,7 +3,9 @@
 
 to install run the following command :
 
-```sh -c "$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)"```
+Using curl : ```sh -c "$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)"```
+
+Using wget : ```sh -c "$(wget https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh -O -)"```
 
 then it should work properly on ```zsh``` and ```bash```.
 
