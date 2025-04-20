@@ -56,7 +56,7 @@ void	fill_hpp_file(std::ofstream &file, std::string &name, char *class_name)
 	file << "\t\t" << class_name << "(void);" << std::endl;
 	file << "\t\t" << class_name << '(' << class_name << " const &copy);" << std::endl;
 	file << "\t\t" << '~' << class_name << "(void);" << std::endl;
-	file << "\t\t" << class_name << " const &operator = (" << class_name << " const &other);" << std::endl;
+	file << "\t\t" << class_name << " &operator = (" << class_name << " const &other);" << std::endl;
 	file << "};" << std::endl;
 	file << std::endl << "#endif";
 }
