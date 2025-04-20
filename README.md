@@ -11,7 +11,7 @@ then it should work properly on ```zsh``` and ```bash```.
 
 you can use it with the command ```hpp``` (use ```hpp -h``` for help)
 
->to update you need just to run ```hpp -u```
+>to update you just need to run ```hpp -u```
 
 ### examples
 
