@@ -6,17 +6,28 @@
 #include "main.hpp"
 
 // Global variables
-int s = 0;
+int		options = 0;
 char	*program_name = nullptr;
 
 void	open_file(std::ofstream &file, std::string &name)
 {
-	file.open(name, std::ios::out | std::ios::app);
-	if (!file.is_open())
+	if (std::ifstream(name))
 	{
-		std::cerr << "Error : opening file : " << name << '.' << std::endl;
-		std::exit(1);
+		std::cout << program_name << ": " << name << ": File already exists" << std::endl;
+		std::cout << "Do you want to overwrite it? (y/N) ";
+		char response;
+		std::cin >> response;
+		if (response != 'y' && response != 'Y')
+		{
+			std::cout << "Operation cancelled." << std::endl;
+			return;
+		}
 	}
+	file.open(name, std::ios::out | std::ios::trunc);
+	if (!file.is_open())
+		std::cerr << program_name << ": " << name << ": " << strerror(errno) << std::endl;
+	else
+		std::cout << "File created: " << name << std::endl;
 }
 
 std::string	get_macro_name(std::string &filename)
@@ -64,20 +75,12 @@ std::string	get_filename(char *class_name, int type)
 	std::string	filename;
 
 	filename = class_name;
+	if ((options & SIMPLE) == 0)
+		filename.append(".class");
 	if (type == HPP)
-	{
-		if (s)
-			filename.append(".hpp");
-		else
-			filename.append(".class.hpp");
-	}
-	if (type == CPP)
-	{
-		if (s)
-			filename.append(".cpp");
-		else
-			filename.append(".class.cpp");
-	}
+		filename.append(".hpp");
+	else if (type == CPP)
+		filename.append(".cpp");
 	return (filename);
 }
 
@@ -95,7 +98,7 @@ void	open_and_fill(char *class_name, int type)
 	file.close();
 }
 
-void	show_help(char *program_name)
+int	show_help(char *program_name)
 {
 	std::cout << "classes' .cpp and .hpp files creator" << std::endl << std::endl;
 	std::cout << "usage: " << program_name << " [-options] class_name1 [class_name2 ...]" << std::endl;
@@ -105,7 +108,7 @@ void	show_help(char *program_name)
 	std::cout << "    -d: delete class related files (.cpp and .hpp)" << std::endl;
 	std::cout << "        use it with 's' to delete simple files" << std::endl;
 	std::cout << "    -u: update the binary" << std::endl;
-	std::exit(0);
+	return (EXIT_SUCCESS);
 }
 
 bool	check_name_validity(char *class_name)
@@ -169,9 +172,8 @@ int	update_binary()
 	return (EXIT_FAILURE);
 }
 
-int	get_options(char ***argv_ptr)
+void	parse_options(char ***argv_ptr)
 {
-	int		result = 0;
 	char	**argv = *argv_ptr;
 	int		i = 0;
 
@@ -183,52 +185,57 @@ int	get_options(char ***argv_ptr)
 		for (int j = 1; argv[i][j]; j++) {
 			switch (argv[i][j]) {
 				case 'h':
-					result |= HELP;
+					options |= HELP;
 					break;
 				case 's':
-					result |= SIMPLE;
+					options |= SIMPLE;
 					break;
 				case 'd':
-					result |= DELETE;
+					options |= DELETE;
 					break;
 				case 'u':
-					result |= UPDATE;
+					options |= UPDATE;
 					break;
 				default:
 					std::cerr << "Unknown option: " << argv[i][j] << std::endl;
-					return (result | ERROR);
+					options = ERROR;
 			}
 		}
 	}
-	if (result & UPDATE && (result != UPDATE || (argv[i] != nullptr)))
+	if (options & UPDATE && (options != UPDATE || (argv[i] != nullptr)))
 	{
 		std::cerr << "Error: -u option cannot be used with other options." << std::endl;
-		return (result | ERROR);
+		options = ERROR;
+	}
+	else if (options & HELP && (options != HELP || (argv[i] != nullptr)))
+	{
+		std::cerr << "Error: -h option cannot be used with other options." << std::endl;
+		options = ERROR;
+	}
+	else if (argv[i] == nullptr)
+	{
+		std::cerr << "Error: No class name provided." << std::endl;
+		options = ERROR;
 	}
 	(*argv_ptr) += i;
-	return result;
 }
 
 int	main(int argc, char *argv[])
 {
-	int		result;
-
 	program_name = argv[0];
 	if (argc == 1)
 	{
 		std::cout << program_name << ": try '" << program_name << " -h' for more information." << std::endl;
 		return (EXIT_FAILURE);
 	}
-	result = get_options(&argv);
-	if (result & ERROR)
+	parse_options(&argv);
+	if (options & ERROR)
 		return (EXIT_FAILURE);
-	if (result & UPDATE)
+	else if (options & UPDATE)
 		return (update_binary());
-	if (result & HELP)
-		show_help(program_name);
-	if (result & SIMPLE)
-		s = 1;
-	if (result & DELETE)
+	else if (options & HELP)
+		return (show_help(program_name));
+	else if (options & DELETE)
 		delete_files(argv);
 	else
 		create_files(argv);
