@@ -5,7 +5,9 @@
 #include <cstring>
 #include "main.hpp"
 
-int s;
+// Global variables
+int s = 0;
+char	*program_name = nullptr;
 
 void	open_file(std::ofstream &file, std::string &name)
 {
@@ -101,7 +103,7 @@ void	show_help(char *program_name)
 	std::cout << "    -h: shows this message" << std::endl;
 	std::cout << "    -s: create with simple filenames (without '.class')" << std::endl;
 	std::cout << "    -d: delete class related files (.cpp and .hpp)" << std::endl;
-	std::cout << "        use it with -s to delete simple files" << std::endl;
+	std::cout << "        use it with 's' to delete simple files" << std::endl;
 	std::cout << "    -u: update the binary" << std::endl;
 	std::exit(0);
 }
@@ -123,41 +125,32 @@ void	delete_files(char *argv[])
 {
 	std::string	filename;
 
-	for (int i = 2 ; argv[i] ; i++)
+	for (int i = 0 ; argv[i] ; i++)
 	{
+		if (!check_name_validity(argv[i]))
+		{
+			std::cerr << program_name << ": " << argv[i] << ": Bad name" << std::endl;
+			continue;
+		}
 		filename = get_filename(argv[i], CPP);
 		if (std::remove(filename.c_str()))
-			std::cerr << "Error removing file : " << filename << std::endl;
+			std::cerr << "Error removing file: " << filename << std::endl;
+		else
+			std::cout << "File removed: " << filename << std::endl;
 		filename = get_filename(argv[i], HPP);
 		if (std::remove(filename.c_str()))
-			std::cerr << "Error removing file : " << filename << std::endl;
+			std::cerr << "Error removing file: " << filename << std::endl;
+		else
+			std::cout << "File removed: " << filename << std::endl;
 	}
-}
-
-int	get_options(char *argv1)
-{
-	int			result = 0;
-	std::string	options = argv1;
-
-	if (argv1[0] != '-')
-		return (result);
-	if (options.find_first_of('h') != std::string::npos)
-		result |= HELP;
-	if (options.find_first_of('s') != std::string::npos)
-		result |= SIMPLE;
-	if (options.find_first_of('d') != std::string::npos)
-		result |= DELETE;
-	if (options.find_first_of('u') != std::string::npos)
-		result |= UPDATE;
-	return (result);
 }
 
 void	create_files(char *argv[])
 {
-	for (int i = s + 1 ; argv[i] ; i++)
+	for (int i = 0 ; argv[i] ; i++)
 	{
 		if (!check_name_validity(argv[i]))
-			std::cerr << "Error : " << argv[i] << " ; Bad name" << std::endl;
+			std::cerr << program_name << ": " << argv[i] << ": Bad name" << std::endl;
 		else
 		{
 			open_and_fill(argv[i], HPP);
@@ -173,32 +166,71 @@ int	update_binary()
 	if (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)\"") == -1)
 		if (system("sh -c \"$(wget https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh -0 -)\"") == -1)
 			std::cout << "Please install one of the following packages : \n\t- curl\n\t- wget" << std::endl;
-	exit(EXIT_FAILURE);
+	return (EXIT_FAILURE);
+}
+
+int	get_options(char ***argv_ptr)
+{
+	int		result = 0;
+	char	**argv = *argv_ptr;
+	int		i = 0;
+
+	while (argv[++i]) {
+		if (argv[i][0] != '-')
+		{
+			break;
+		}
+		for (int j = 1; argv[i][j]; j++) {
+			switch (argv[i][j]) {
+				case 'h':
+					result |= HELP;
+					break;
+				case 's':
+					result |= SIMPLE;
+					break;
+				case 'd':
+					result |= DELETE;
+					break;
+				case 'u':
+					result |= UPDATE;
+					break;
+				default:
+					std::cerr << "Unknown option: " << argv[i][j] << std::endl;
+					return (result | ERROR);
+			}
+		}
+	}
+	if (result & UPDATE && (result != UPDATE || (argv[i] != nullptr)))
+	{
+		std::cerr << "Error: -u option cannot be used with other options." << std::endl;
+		return (result | ERROR);
+	}
+	(*argv_ptr) += i;
+	return result;
 }
 
 int	main(int argc, char *argv[])
 {
-	int	result;
+	int		result;
 
-	if (argc > 1)
+	program_name = argv[0];
+	if (argc == 1)
 	{
-		result = get_options(argv[1]);
-		if (result & UPDATE)
-			return (update_binary());
-		if (result & HELP)
-			show_help(argv[0]);
-		if (result & SIMPLE)
-			s = 1;
-		if (result & DELETE)
-			delete_files(argv);
-		else
-			create_files(argv);
-	}
-	else
-	{
-		std::cout << argv[0] << ": try '"
-			<< argv[0] << " -h' for more information." << std::endl;
+		std::cout << program_name << ": try '" << program_name << " -h' for more information." << std::endl;
 		return (EXIT_FAILURE);
 	}
+	result = get_options(&argv);
+	if (result & ERROR)
+		return (EXIT_FAILURE);
+	if (result & UPDATE)
+		return (update_binary());
+	if (result & HELP)
+		show_help(program_name);
+	if (result & SIMPLE)
+		s = 1;
+	if (result & DELETE)
+		delete_files(argv);
+	else
+		create_files(argv);
 	return (EXIT_SUCCESS);
 }
