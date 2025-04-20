@@ -7,5 +7,6 @@
 # define SIMPLE 8
 # define DELETE 16
 # define UPDATE 32
+# define ERROR 64
 
 #endif
