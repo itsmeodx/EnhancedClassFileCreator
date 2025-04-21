@@ -50,28 +50,21 @@ void	fill_hpp_file(std::ofstream &file, std::string &name, char *class_name)
 {
 	std::string	macro_name = get_macro_name(name);
 
-	file << "#ifndef " << macro_name << std::endl;
-	file << "# define " << macro_name << std::endl << std::endl;
-	file << "class " << class_name << std::endl << '{' << std::endl << "\tpublic :" << std::endl;
-	file << "\t\t" << class_name << "(void);" << std::endl;
-	file << "\t\t" << class_name << '(' << class_name << " const &copy);" << std::endl;
-	file << "\t\t" << '~' << class_name << "(void);" << std::endl;
-	file << "\t\t" << class_name << " &operator = (" << class_name << " const &other);" << std::endl;
-	file << "};" << std::endl;
-	file << std::endl << "#endif";
+	file << "#ifndef " << macro_name << "\n# define " << macro_name << "\n\nclass "
+	<< class_name << "\n{\n\tprivate:\n\t\t// Implementation\n\n\tpublic:\n\t\t"
+	<< class_name << "(void);\n\t\t" << class_name << '(' << class_name
+	<< " const &copy);\n\t\t~" << class_name << "(void);\n\t\t" << class_name
+	<< " &operator = (" << class_name << " const &other);\n};\n\n#endif" << std::endl;
 }
 
 void	fill_cpp_file(std::ofstream &file, std::string &filename, char *class_name)
 {
-	file << "#include \"" << filename.substr(0, filename.length() - 4) << ".hpp\"" << std::endl << std::endl;
-	file << class_name << "::" << class_name << "(void) {}" << std::endl << std::endl;
-	file << class_name << "::" << class_name << '(' << class_name << " const &copy)" << std::endl
-	<< "{" << std::endl << "\t*this = copy;" << std::endl << "}" << std::endl << std::endl;
-	file << class_name << "::~" << class_name << "(void) {}" << std::endl << std::endl;
-	file << class_name << " \t&" << class_name << "::operator = (" << class_name << " const &other)" << std::endl <<
-	"{" << std::endl << "\tif (this != &other)" << std::endl << "\t{" << std::endl;
-	file << "\t\t// TODO: copy attributes" << std::endl; file << "\t}" << std::endl;
-	file << "\treturn (*this);" << std::endl << "}" << std::endl << std::endl;
+	file << "#include \"" << filename.substr(0, filename.length() - 4) << ".hpp\"\n\n"
+	<< class_name << "::" << class_name << "(void) {}\n\n" << class_name << "::"
+	<< class_name << '(' << class_name << " const &copy)\n{\n\t*this = copy;\n}\n\n"
+	<< class_name << "::~" << class_name << "(void) {}\n\n" << class_name << " \t&"
+	<< class_name << "::operator = (" << class_name << " const &other)\n{\n\tif (this != &other)\n"
+	"\t{\n\t\t// Implementation\n\t}\n\treturn (*this);\n}" << std::endl;
 }
 
 std::string	get_filename(char *class_name, int type)
