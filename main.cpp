@@ -54,7 +54,8 @@ void	fill_hpp_file(std::ofstream &file, std::string &name, char *class_name)
 	<< class_name << "\n{\n\tprivate:\n\t\t// Implementation\n\n\tpublic:\n\t\t"
 	<< class_name << "(void);\n\t\t" << class_name << '(' << class_name
 	<< " const &copy);\n\t\t~" << class_name << "(void);\n\t\t" << class_name
-	<< " &operator = (" << class_name << " const &other);\n};\n\n#endif" << std::endl;
+	<< " &operator = (" << class_name << " const &other);\n};\n\n#endif // "
+	<< macro_name << std::endl;
 }
 
 void	fill_cpp_file(std::ofstream &file, std::string &filename, char *class_name)
