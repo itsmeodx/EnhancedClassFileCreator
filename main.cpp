@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include "main.hpp"
 
 // Global variables
@@ -13,11 +14,11 @@ void	open_file(std::ofstream &file, std::string &name)
 {
 	if (std::ifstream(name))
 	{
-		std::cout << program_name << ": " << name << ": File already exists" << std::endl;
+		std::cout << program_name << ": " << name << ": already exists" << std::endl;
 		std::cout << "Do you want to overwrite it? (y/N) ";
-		char response;
-		std::cin >> response;
-		if (response != 'y' && response != 'Y')
+		std::string	response;
+		std::getline(std::cin, response);
+		if (response != "y" && response != "Y")
 		{
 			std::cout << "Operation cancelled." << std::endl;
 			return;
@@ -27,7 +28,7 @@ void	open_file(std::ofstream &file, std::string &name)
 	if (!file.is_open())
 		std::cerr << program_name << ": " << name << ": " << strerror(errno) << std::endl;
 	else
-		std::cout << "File created: " << name << std::endl;
+		std::cout << program_name << ": " << name << ": created" << std::endl;
 }
 
 std::string	get_macro_name(std::string &filename)
@@ -52,9 +53,9 @@ void	fill_hpp_file(std::ofstream &file, std::string &name, char *class_name)
 
 	file << "#ifndef " << macro_name << "\n# define " << macro_name << "\n\nclass "
 	<< class_name << "\n{\n\tprivate:\n\t\t// Implementation\n\n\tpublic:\n\t\t"
-	<< class_name << "(void);\n\t\t" << class_name << '(' << class_name
-	<< " const &copy);\n\t\t~" << class_name << "(void);\n\t\t" << class_name
-	<< " &operator = (" << class_name << " const &other);\n};\n\n#endif // "
+	<< class_name << "(void);\n\t\t" << class_name << "(const " << class_name
+	<< " &copy);\n\t\t~" << class_name << "(void);\n\t\t" << class_name
+	<< " &operator = (const " << class_name << " &other);\n};\n\n#endif // "
 	<< macro_name << std::endl;
 }
 
@@ -62,9 +63,9 @@ void	fill_cpp_file(std::ofstream &file, std::string &filename, char *class_name)
 {
 	file << "#include \"" << filename.substr(0, filename.length() - 4) << ".hpp\"\n\n"
 	<< class_name << "::" << class_name << "(void) {}\n\n" << class_name << "::"
-	<< class_name << '(' << class_name << " const &copy)\n{\n\t*this = copy;\n}\n\n"
+	<< class_name << "(const " << class_name << " &copy)\n{\n\t*this = copy;\n}\n\n"
 	<< class_name << "::~" << class_name << "(void) {}\n\n" << class_name << " \t&"
-	<< class_name << "::operator = (" << class_name << " const &other)\n{\n\tif (this != &other)\n"
+	<< class_name << "::operator = (const " << class_name << " &other)\n{\n\tif (this != &other)\n"
 	"\t{\n\t\t// Implementation\n\t}\n\treturn (*this);\n}" << std::endl;
 }
 
@@ -96,19 +97,6 @@ void	open_and_fill(char *class_name, int type)
 	file.close();
 }
 
-int	show_help(char *program_name)
-{
-	std::cout << "classes' .cpp and .hpp files creator" << std::endl << std::endl;
-	std::cout << "usage: " << program_name << " [-options] class_name1 [class_name2 ...]" << std::endl;
-	std::cout << "options:" << std::endl;
-	std::cout << "    -h: shows this message" << std::endl;
-	std::cout << "    -s: create with simple filenames (without '.class')" << std::endl;
-	std::cout << "    -d: delete class related files (.cpp and .hpp)" << std::endl;
-	std::cout << "        use it with 's' to delete simple files" << std::endl;
-	std::cout << "    -u: update the binary" << std::endl;
-	return (EXIT_SUCCESS);
-}
-
 bool	check_name_validity(char *class_name)
 {
 	int	length;
@@ -120,6 +108,21 @@ bool	check_name_validity(char *class_name)
 		if (!std::isalnum(class_name[i]) && (class_name[i] != '_'))
 			return (0);
 	return (1);
+}
+
+void	create_files(char *argv[])
+{
+	for (int i = 0 ; argv[i] ; i++)
+	{
+		if (!check_name_validity(argv[i]))
+			std::cerr << program_name << ": " << argv[i] << ": Bad name" << std::endl;
+		else
+		{
+			open_and_fill(argv[i], HPP);
+			open_and_fill(argv[i], CPP);
+		}
+	}
+
 }
 
 void	delete_files(char *argv[])
@@ -146,28 +149,30 @@ void	delete_files(char *argv[])
 	}
 }
 
-void	create_files(char *argv[])
-{
-	for (int i = 0 ; argv[i] ; i++)
-	{
-		if (!check_name_validity(argv[i]))
-			std::cerr << program_name << ": " << argv[i] << ": Bad name" << std::endl;
-		else
-		{
-			open_and_fill(argv[i], HPP);
-			open_and_fill(argv[i], CPP);
-		}
-	}
-
-}
-
-int	update_binary()
+int	update_binary(void)
 {
 	std::cout << "Updating binary..." << std::endl;
 	if (system("sh -c \"$(curl -fsSL https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh)\"") == -1)
 		if (system("sh -c \"$(wget https://raw.githubusercontent.com/itsmeodx/ClassFileCreator/master/install.sh -0 -)\"") == -1)
 			std::cout << "Please install one of the following packages : \n\t- curl\n\t- wget" << std::endl;
 	return (EXIT_FAILURE);
+}
+
+void	show_usage()
+{
+	std::cout << program_name << ": try '" << program_name << " -h' for more information." << std::endl;
+}
+int	show_help(void)
+{
+	std::cout << "classes' .cpp and .hpp files creator" << std::endl << std::endl;
+	std::cout << "usage: " << program_name << " [-options] class_name1 [class_name2 ...]" << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << "    -h: shows this message" << std::endl;
+	std::cout << "    -s: create with simple filenames (without '.class')" << std::endl;
+	std::cout << "    -d: delete class related files (.cpp and .hpp)" << std::endl;
+	std::cout << "        use it with 's' to delete simple files" << std::endl;
+	std::cout << "    -u: update the binary" << std::endl;
+	return (EXIT_SUCCESS);
 }
 
 void	parse_options(char ***argv_ptr)
@@ -200,22 +205,24 @@ void	parse_options(char ***argv_ptr)
 			}
 		}
 	}
-	if (options & UPDATE && (options != UPDATE || (argv[i] != nullptr)))
+	(*argv_ptr) += i;
+	if (options & ERROR)
+		return;
+	if (options > UPDATE)
 	{
 		std::cerr << "Error: -u option cannot be used with other options." << std::endl;
 		options = ERROR;
 	}
-	else if (options & HELP && (options != HELP || (argv[i] != nullptr)))
+	else if (options > HELP && options < UPDATE)
 	{
 		std::cerr << "Error: -h option cannot be used with other options." << std::endl;
 		options = ERROR;
 	}
-	else if (argv[i] == nullptr)
+	else if (argv[i] == nullptr && options <= SIMPLE + DELETE)
 	{
 		std::cerr << "Error: No class name provided." << std::endl;
 		options = ERROR;
 	}
-	(*argv_ptr) += i;
 }
 
 int	main(int argc, char *argv[])
@@ -223,7 +230,7 @@ int	main(int argc, char *argv[])
 	program_name = argv[0];
 	if (argc == 1)
 	{
-		std::cout << program_name << ": try '" << program_name << " -h' for more information." << std::endl;
+		show_usage();
 		return (EXIT_FAILURE);
 	}
 	parse_options(&argv);
@@ -232,7 +239,7 @@ int	main(int argc, char *argv[])
 	else if (options & UPDATE)
 		return (update_binary());
 	else if (options & HELP)
-		return (show_help(program_name));
+		return (show_help());
 	else if (options & DELETE)
 		delete_files(argv);
 	else

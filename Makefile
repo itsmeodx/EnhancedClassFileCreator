@@ -6,7 +6,7 @@ SRCS = main.cpp
 
 INCLUDES = main.hpp
 
-FLAGS = -Wall -Wextra -Werror -O2
+FLAGS = -Wall -Wextra -Werror
 
 all : $(NAME)
 
