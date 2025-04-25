@@ -64,7 +64,7 @@ void	fill_cpp_file(std::ofstream &file, std::string &filename, char *class_name)
 	file << "#include \"" << filename.substr(0, filename.length() - 4) << ".hpp\"\n\n"
 	<< class_name << "::" << class_name << "(void) {}\n\n" << class_name << "::"
 	<< class_name << "(const " << class_name << " &copy)\n{\n\t*this = copy;\n}\n\n"
-	<< class_name << "::~" << class_name << "(void) {}\n\n" << class_name << " \t&"
+	<< class_name << "::~" << class_name << "(void) {}\n\n" << class_name << " &"
 	<< class_name << "::operator = (const " << class_name << " &other)\n{\n\tif (this != &other)\n"
 	"\t{\n\t\t// Implementation\n\t}\n\treturn (*this);\n}" << std::endl;
 }
@@ -138,14 +138,14 @@ void	delete_files(char *argv[])
 		}
 		filename = get_filename(argv[i], CPP);
 		if (std::remove(filename.c_str()))
-			std::cerr << "Error removing file: " << filename << std::endl;
+			std::cerr << program_name << ": " << filename << ": " << strerror(errno) << std::endl;
 		else
-			std::cout << "File removed: " << filename << std::endl;
+			std::cout << program_name << ": " << filename << ": removed" << std::endl;
 		filename = get_filename(argv[i], HPP);
 		if (std::remove(filename.c_str()))
-			std::cerr << "Error removing file: " << filename << std::endl;
+			std::cerr << program_name << ": " << filename << ": " << strerror(errno) << std::endl;
 		else
-			std::cout << "File removed: " << filename << std::endl;
+			std::cout << program_name << ": " << filename << ": removed" << std::endl;
 	}
 }
 
